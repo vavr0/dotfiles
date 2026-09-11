@@ -1,0 +1,42 @@
+background = 000000
+foreground= ffffff
+
+font-family = "SauceCodePro Nerd Font"
+font-style = "SemiBold"
+font-family-bold = "SauceCodePro Nerd Font"
+font-style-bold = "Bold"
+
+font-size = 19
+font-thicken = true
+
+theme = theme
+
+cursor-style = block
+cursor-style-blink = false
+shell-integration-features = no-cursor
+cursor-color = b4a7d6
+cursor-invert-fg-bg = true
+
+selection-background = 8fce00
+
+mouse-hide-while-typing = true
+
+background-opacity = 0.75
+
+background-blur-radius = 45
+
+title = " "
+window-decoration = auto
+macos-titlebar-style = hidden
+
+window-padding-y = 10
+window-padding-x = 10
+
+
+macos-icon-frame = beige
+
+macos-icon = custom-style  
+macos-icon-screen-color = 7E0784
+macos-icon-ghost-color = 000000
+
+macos-option-as-alt = true
