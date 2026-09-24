@@ -1,0 +1,20 @@
+{
+  "tui.editor.cursorUp": ["up", "alt+k"],
+  "tui.editor.cursorDown": ["down", "alt+j"],
+  "tui.editor.cursorLeft": ["left", "alt+h"],
+  "tui.editor.cursorRight": ["right", "alt+l"],
+  "tui.editor.cursorWordLeft": ["alt+left", "alt+b"],
+  "tui.editor.cursorWordRight": ["alt+right", "alt+w"],
+  "tui.select.up": ["up", "alt+k", "ctrl+p"],
+  "tui.select.down": ["down", "alt+j", "ctrl+n"],
+  "tui.select.confirm": ["enter", "ctrl+y"],
+  "tui.editor.yank": [],
+  "app.thinking.cycle": ["ctrl+t"],
+  "app.thinking.toggle": ["ctrl+x"],
+  "app.tree.filter.noTools": [],
+  "app.model.cycleForward": [],
+  "app.session.togglePath": [],
+  "app.session.resume": ["ctrl+r"],
+  "app.clear": ["ctrl+c"],
+  "app.exit": ["ctrl+q"]
+}

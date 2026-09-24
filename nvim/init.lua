@@ -4,6 +4,16 @@ local map = vim.keymap.set
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+vim.filetype.add({
+    filename = {
+        ["todo.txt"] = "todo",
+        ["done.txt"] = "todo",
+    },
+    extension = {
+        todo = "todo",
+    },
+})
+
 vim.cmd("packadd nvim.undotree")
 vim.cmd("packadd nvim.difftool")
 vim.cmd("packadd nvim.tohtml")
@@ -113,7 +123,6 @@ vim.pack.add({
     { src = "https://github.com/windwp/nvim-ts-autotag" },
     { src = "https://github.com/MeanderingProgrammer/render-markdown.nvim" },
     { src = "https://github.com/j-hui/fidget.nvim" },
-    { src = 'https://github.com/nvim-orgmode/orgmode' },
     { src = 'https://github.com/jceb/jiejie.nvim' },
 })
 
@@ -147,8 +156,6 @@ require("mason-lspconfig").setup({
 for _, s in ipairs(servers) do
     vim.lsp.config(s, { capabilities = capabilities })
 end
-
-vim.lsp.enable('org')
 
 vim.lsp.config("lua_ls", {
     settings = {
@@ -213,13 +220,6 @@ fzf.setup({
             ["ctrl-q"] = "select-all+accept",
         },
     }
-})
-
--- org
-require('orgmode').setup({
-    org_agenda_files = '~/personal/notes/org/**/*.org',
-    org_default_notes_file = '~/personal/notes/org/inbox.org',
-    org_archive_location = '~/personal/notes/org/archive.org::',
 })
 
 vim.g.jiejie_config = {
@@ -551,7 +551,7 @@ map("n", "<leader>w", "<cmd>update<CR>", { desc = "Save file" })
 map("n", "<leader>q", "<cmd>quit<CR>", { desc = "Quit file" })
 map("n", "<leader>Q", "<cmd>:wqa<CR>", { desc = "Quit and savefile" })
 map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Substitute word" })
-map("n", "<leader>k", "<cmd>Oil --preview --float<CR>", { desc = "Open parent directory" })
+map("n", "<leader>o", "<cmd>Oil --preview --float<CR>", { desc = "Open parent directory" })
 
 -- map({ 'n', 'v' }, '<leader>n', ':norm ')
 
