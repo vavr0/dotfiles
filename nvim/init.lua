@@ -89,26 +89,26 @@ vim.opt.fillchars:append({ fold = " " })
 ---         plugins           ---
 ---------------------------------
 
+vim.g.jiejie_config = {
+    excluded_revset = 'bookmarks(glob:"renovate/*") | tracked_remote_bookmarks(glob:"renovate/*") | untracked_remote_bookmarks(glob:"renovate/*")',
+    default_view = 1,
+    dynamic_views = { { revset = "merges()" } },
+    log_revisions = 10,
+}
+
 vim.pack.add({
-    { src = "https://github.com/mason-org/mason.nvim" },
     { src = "https://github.com/neovim/nvim-lspconfig" },
-    { src = "https://github.com/mason-org/mason-lspconfig.nvim" },
     { src = "https://github.com/mfussenegger/nvim-jdtls" },
-
-    { src = "https://github.com/nvim-treesitter/nvim-treesitter",          version = 'main' },
+    { src = "https://github.com/nvim-treesitter/nvim-treesitter",        version = 'main' },
     { src = "https://github.com/nvim-treesitter/nvim-treesitter-context" },
-
-    { src = "https://github.com/L3MON4D3/LuaSnip" },
-    { src = "https://github.com/saghen/blink.cmp",                         version = vim.version.range("^1") },
+    { src = "https://github.com/saghen/blink.cmp",                       version = vim.version.range("^1") },
     { src = "https://github.com/rafamadriz/friendly-snippets" },
-
     { src = "https://github.com/rose-pine/neovim" },
-
     { src = "https://github.com/ibhagwan/fzf-lua" },
+    { src = "https://github.com/rachartier/tiny-cmdline.nvim" },
     { src = "https://github.com/mfussenegger/nvim-dap" },
     { src = "https://github.com/igorlfs/nvim-dap-view" },
     { src = "https://github.com/theHamsta/nvim-dap-virtual-text" },
-
     { src = "https://github.com/nvim-mini/mini.icons" },
     { src = "https://github.com/nvim-mini/mini.bufremove" },
     { src = "https://github.com/nvim-mini/mini.pairs" },
@@ -117,21 +117,21 @@ vim.pack.add({
     { src = "https://github.com/stevearc/oil.nvim" },
     { src = "https://github.com/chomosuke/typst-preview.nvim" },
     { src = "https://github.com/lervag/vimtex" },
-    { src = "https://github.com/opdavies/toggle-checkbox.nvim" },
     { src = "https://github.com/chentoast/marks.nvim" },
     { src = "https://github.com/tpope/vim-fugitive" },
+    { src = "https://github.com/jceb/jiejie.nvim" },
     { src = "https://github.com/windwp/nvim-ts-autotag" },
-    { src = "https://github.com/MeanderingProgrammer/render-markdown.nvim" },
     { src = "https://github.com/j-hui/fidget.nvim" },
-    { src = 'https://github.com/jceb/jiejie.nvim' },
 })
 
 local servers = {
     "lua_ls",
+    "nixd",
     "rust_analyzer",
     "ts_ls",
     "gopls",
     "basedpyright",
+    "ruff",
     "zls",
     "clangd",
     "bashls",
@@ -139,6 +139,7 @@ local servers = {
     "tinymist",
     "html",
     "cssls",
+    "jsonls",
     "markdown_oxide",
 }
 
@@ -148,14 +149,24 @@ local servers = {
 
 local capabilities = require("blink.cmp").get_lsp_capabilities()
 
-require("mason").setup()
-require("mason-lspconfig").setup({
-    ensure_installed = servers,
-})
-
 for _, s in ipairs(servers) do
     vim.lsp.config(s, { capabilities = capabilities })
 end
+
+vim.lsp.config("basedpyright", {
+    before_init = function(_, config)
+        local python = vim.fs.joinpath(config.root_dir or vim.fn.getcwd(), ".venv", "bin", "python")
+        if vim.fn.executable(python) == 1 then
+            config.settings.python = vim.tbl_extend("force", config.settings.python or {}, { pythonPath = python })
+        end
+    end,
+})
+
+vim.lsp.enable({
+    "clangd", "rust_analyzer", "lua_ls", "nixd",
+    "basedpyright", "ruff", "bashls", "html", "cssls", "jsonls", "ts_ls",
+})
+
 
 vim.lsp.config("lua_ls", {
     settings = {
@@ -222,16 +233,6 @@ fzf.setup({
     }
 })
 
-vim.g.jiejie_config = {
-      -- Excluded revset expression, see https://docs.jj-vcs.dev/latest/revsets/ for the full language
-    excluded_revset = 'bookmarks(glob:"renovate/*") | tracked_remote_bookmarks(glob:"renovate/*") | untracked_remote_bookmarks(glob:"renovate/*")',
-    default_view = 1,
-    dynamic_views = {
-      -- Dynamic view that dispalys all merges, see https://docs.jj-vcs.dev/latest/revsets/ for the full language
-      { revset = "merges()" }
-    },
-    log_revisions = 10,
-}
 
 -- VimTeX
 vim.g.vimtex_view_method = "sioyek"
@@ -261,72 +262,27 @@ require("nvim-dap-virtual-text").setup({
 
 dapview.setup({})
 
-dap.listeners.after.event_initialized["dapview_autoopen"] = function()
-    dapview.open()
-end
-dap.listeners.before.event_terminated["dapview_autoclose"] = function()
-    dapview.close()
-end
-dap.listeners.before.event_exited["dapview_autoclose"] = function()
-    dapview.close()
+dap.listeners.after.event_initialized["dapview_autoopen"] = dapview.open
+for _, event in ipairs({ "event_terminated", "event_exited" }) do
+    dap.listeners.before[event]["dapview_autoclose"] = function() dapview.close() end
 end
 
-local codelldb = vim.fn.exepath("codelldb")
-if codelldb == "" then
-    codelldb = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb"
+dap.adapters.lldb = { type = "executable", command = "lldb-dap", name = "lldb" }
+local debug_args = {}
+for ft, dir in pairs({ c = "/build/", cpp = "/build/", rust = "/target/debug/", zig = "/zig-out/bin/" }) do
+    dap.configurations[ft] = { {
+        name = "Launch executable",
+        type = "lldb",
+        request = "launch",
+        program = function()
+            return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. dir, "file")
+        end,
+        cwd = "${workspaceFolder}",
+        stopOnEntry = false,
+        args = function() return debug_args end,
+        env = ft == "rust" and { RUST_BACKTRACE = "1" } or nil,
+    } }
 end
-
-dap.adapters.codelldb = {
-    type = "server",
-    port = "${port}",
-    executable = {
-        command = codelldb,
-        args = { "--port", "${port}" },
-    },
-}
-
-local function pick_file_with(suffix)
-    return function()
-        return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. suffix, "file")
-    end
-end
-
-local common = {
-    type = "codelldb",
-    request = "launch",
-    cwd = "${workspaceFolder}",
-    stopOnEntry = false,
-    args = {},
-}
-
-dap.configurations.c = {
-    vim.tbl_extend("force", common, {
-        name = "Launch C binary",
-        program = pick_file_with("/build/"),
-    }),
-}
-
-dap.configurations.cpp = {
-    vim.tbl_extend("force", common, {
-        name = "Launch C++ binary",
-        program = pick_file_with("/build/"),
-    }),
-}
-
-dap.configurations.rust = {
-    vim.tbl_extend("force", common, {
-        name = "Launch Rust binary",
-        program = pick_file_with("/target/debug/"),
-        env = { RUST_BACKTRACE = "1" },
-    }),
-}
-
-dap.configurations.zig = {
-    vim.tbl_extend("force", common, {
-        name = "Launch Zig binary",
-        program = pick_file_with("/zig-out/bin/"),
-    }),
-}
 
 
 require("rose-pine").setup({
@@ -377,6 +333,9 @@ treesitter.install({
     "typescript",
     "java",
     "html",
+    "css",
+    "json",
+    "bash",
     "c",
     "cpp",
     "glsl",
@@ -399,33 +358,6 @@ require("treesitter-context").setup({
 })
 
 
-require("render-markdown").setup({
-    pipe_table = { preset = "round" },
-    render_modes = { "n", "v", "i", "c" },
-    heading = {
-        icons = { " 󰎤 ", "  󰎧 ", " 󰎪 ", " 󰎭 ", " 󰎱 ", " 󰇏 " },
-        backgrounds = {
-            "Headline1Bg",
-            "Headline2Bg",
-            "Headline3Bg",
-            "Headline4Bg",
-            "Headline5Bg",
-            "Headline6Bg",
-        },
-    },
-    indent = {
-        enabled = true,
-        render_modes = false,
-        per_level = 2,
-        skip_level = 1,
-        skip_heading = true,
-        icon = " ",
-        priority = 0,
-        highlight = "RenderMarkdownIndent",
-    },
-})
-
-
 require("blink.cmp").setup({
     keymap = {
         preset = "none",
@@ -434,7 +366,6 @@ require("blink.cmp").setup({
         ["<C-y>"] = { "accept", "fallback" },
         ["<C-Space>"] = { "show", "show_documentation", "hide_documentation" },
     },
-    snippets = { preset = "luasnip" },
     appearance = {
         nerd_font_variant = "mono",
     },
@@ -459,10 +390,9 @@ require("blink.cmp").setup({
     },
 })
 
-require("luasnip.loaders.from_lua").lazy_load({
-    paths = { vim.fn.stdpath("config") .. "/snippets" },
+require("tiny-cmdline").setup({
+    on_reposition = require("tiny-cmdline").adapters.blink,
 })
-require("luasnip.loaders.from_vscode").lazy_load()
 
 require("fidget").setup({})
 
@@ -553,7 +483,6 @@ map("n", "<leader>Q", "<cmd>:wqa<CR>", { desc = "Quit and savefile" })
 map("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Substitute word" })
 map("n", "<leader>o", "<cmd>Oil --preview --float<CR>", { desc = "Open parent directory" })
 
--- map({ 'n', 'v' }, '<leader>n', ':norm ')
 
 map("n", "<C-j>", "<cmd>cnext<CR>zz", { desc = "Next quickfix" })
 map("n", "<C-k>", "<cmd>cprev<CR>zz", { desc = "Prev quickfix" })
@@ -632,7 +561,6 @@ map("n", "<leader>bd", function()
 end, { desc = "Delete buffer" })
 
 map("n", "<leader>u", vim.cmd.Undotree, { desc = "Toggle Undotree" })
-map("n", "<leader>to", ":lua require('toggle-checkbox').toggle()<CR>", { desc = "Toggle checkbox" })
 
 -- FZF-LUA
 
@@ -641,6 +569,7 @@ map("n", "<leader>m", fzf.buffers, { desc = "Buffers" })
 map("n", "<leader>ps", fzf.live_grep, { desc = "Live grep" })
 map("n", "<leader>he", fzf.helptags, { desc = "Help tags" })
 map("n", "<leader>gf", fzf.git_files, { desc = "Git files" })
+map("n", "<leader>la", fzf.args, { desc = "Args picker" })
 map("n", "<leader>ls", fzf.lsp_document_symbols, { desc = "LSP document symbols" })
 map("n", "<leader>lS", fzf.lsp_workspace_symbols, { desc = "LSP workspace symbols" })
 map("n", "<leader>te", fzf.builtin, { desc = "FZF-Lua commands" })
@@ -655,13 +584,7 @@ map("n", "<leader>dr", require("dap").repl.open, { desc = "Open REPL" })
 map("n", "<leader>do", require("dap").step_over, { desc = "Step Over" })
 map("n", "<leader>di", require("dap").step_into, { desc = "Step Into" })
 map("n", "<leader>da", function()
-    local args = vim.fn.input("New args: ")
-    local parsed = vim.trim(args) == "" and {} or vim.split(args, " ", { trimempty = true })
-    for _, ft in ipairs({ "c", "cpp", "rust", "zig" }) do
-        if require("dap").configurations[ft] and require("dap").configurations[ft][1] then
-            require("dap").configurations[ft][1].args = parsed
-        end
-    end
+    debug_args = require("dap.utils").splitstr(vim.fn.input("New args: "))
 end, { desc = "Set args for debugging" })
 
 
@@ -671,6 +594,10 @@ end, { desc = "Buffer Local Keymaps (which-key)" })
 
 
 
+
+map("n", "<leader>jj", "<cmd>tabnew<CR><cmd>J<CR><cmd>only<CR>", { desc = "Jiejie in a tab" })
+map("n", "<leader>js", "<cmd>J status<CR>", { desc = "jj status" })
+map("n", "<leader>jd", "<cmd>Jdiffsplit @<CR><C-w>H", { desc = "jj vertical diff" })
 
 map("n", "<leader>gi", "<cmd>Git<CR>", { desc = "Fugitive status" })
 map("n", "<leader>gb", "<cmd>Git blame<CR>", { desc = "Fugitive blame" })

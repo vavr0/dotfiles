@@ -1,0 +1,38 @@
+{
+    "layer": "top",
+    "height": 26,
+    "modules-left": ["workspaces", "custom/layout-divider", "layout", "window"],
+    "modules-center": [],
+    "modules-right": ["tray", "custom/keyboardlayout", "network", "memory", "pulseaudio", "clock#time"],
+    "workspaces": {
+        "hide-empty": true,
+        "overview-label": "ALL",
+        "on-click": "activate",
+        "on-click-right": "toggle"
+    },
+    "custom/layout-divider": { "format": "│" },
+    "layout": { "format": "{}" },
+    "custom/keyboardlayout": {
+        "exec": "case \"$(mmsg get keyboardlayout)\" in *'English (US)'*) printf US ;; *Slovak*) printf SK ;; *) printf '?' ;; esac",
+        "interval": 1,
+        "format": "{}"
+    },
+    "window": { "format": "{}", "max-length": 420 },
+    "network": {
+        "format": "{icon}",
+        "format-wifi": "{icon}",
+        "format-ethernet": "{icon}",
+        "format-disconnected": "{icon}",
+        "icon-wifi": "󰖩",
+        "icon-ethernet": "󰈀",
+        "icon-disconnected": "󰖪"
+    },
+    "memory": { "format": "󰍛 {}%", "interval": 5 },
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "󰝟",
+        "icons": ["󰕿", "󰖀", "󰕾"]
+    },
+    "clock#time": { "format": "󰃭 {:L%d %b}  {:L%H:%M}" },
+    "tray": { "icon-size": 14, "spacing": 8 }
+}

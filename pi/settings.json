@@ -1,0 +1,17 @@
+{
+  "lastChangelogVersion": "1.4.0",
+  "deviceId": "ef13fe68-2dee-4238-80c6-40a5253844bd",
+  "defaultProvider": "openai",
+  "defaultModel": "gpt-6.1-sol",
+  "defaultThinkingLevel": "high",
+  "hideThinkingBlock": false,
+  "tuiMode": "regular",
+  "theme": "rose-pine",
+  "packages": [
+    "npm:pi-web-access",
+    "git:github.com/JuliusBrussee/caveman",
+    "npm:pi-open-tui@0.3.8",
+    "npm:pi-ask-user-question@1.0.0",
+    "npm:@tmustier/pi-queue-steer@0.2.2"
+  ]
+}

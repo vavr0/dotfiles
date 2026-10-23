@@ -1,175 +1,126 @@
-# export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
+# ── Environment ──────────────────────────────────────────────
 
-# Path to your Oh My Zsh installation.
-# export PATH="$PATH:/Users/vavro/source/zig-aarch64-macos-0.15.0-dev.1084+dbe0e0c1b"
-#
-export ZSH="$HOME/.oh-my-zsh"
+export PI_CODING_AGENT_DIR="$HOME/.config/pi"
+export EDITOR=nvim
+export VISUAL=nvim
+export MANPAGER='nvim +Man!'
 
-export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-export PATH="$HOME/go/bin:/opt/homebrew/bin:$PATH"
-export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
-export PATH="$HOME/.ghcup/bin:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
-export PATH="/Users/vavro/source/tylax/target/release:$PATH"
+   # Personal executables. Nix manages the system PATH.
+   typeset -U path
+   path=("$HOME/.local/bin" "$HOME/bin" $path)
 
+   # Keep any existing history; create a location if none is configured.
+   if [[ -z "$HISTFILE" ]]; then
+       mkdir -p "$HOME/.local/state/zsh"
+       HISTFILE="$HOME/.local/state/zsh/history"
+   fi
 
+   HISTSIZE=100000
+   SAVEHIST=100000
 
-
-# FZF
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS
-  --bind='ctrl-j:down,ctrl-k:up'
-  --border --layout=reverse --height=80%"
-  
-# Nice CTRL-R interface
-export FZF_CTRL_R_OPTS='
-  --sort
-  --layout=reverse
-  --border
-  --height=80%
-  --prompt="History> "
-  --pointer="▶"
-  --marker="✓"
-'
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
-export FZF_CTRL_T_OPTS='
-  --border --preview "bat --style=numbers --color=always --line-range :500 {} 2> /dev/null || \
-            cat {} 2> /dev/null"
-  --preview-window=right:60%
-'
+   setopt APPEND_HISTORY
+   setopt SHARE_HISTORY
+   setopt HIST_IGNORE_DUPS
+   setopt HIST_FIND_NO_DUPS
+   setopt HIST_REDUCE_BLANKS
+   setopt HIST_IGNORE_SPACE
 
 
-export FZF_ALT_C_OPTS='
-  --border --preview "exa -T --color=always --icons {} 2> /dev/null || tree -C {}"
-  --preview-window=right:50%
-'
+   # ── fzf ──────────────────────────────────────────────────────
 
-# export MANPAGER="sh -c 'awk '\''{ gsub(/\x1B\[[0-9;]*m/, \"\", \$0); gsub(/.\x08/, \"\", \$0); print }'\'' | bat -p -lman'"
-export MANPAGER="nvim +Man!"
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time Oh My Zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="robbyrussell"
-# eval "$(starship init zsh)"
+   export FZF_DEFAULT_OPTS='
+   --bind=ctrl-j:down,ctrl-k:up
+   --border
+   --layout=reverse
+   --height=80%
+   '
 
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in $ZSH/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+   export FZF_CTRL_R_OPTS='
+   --sort
+   --prompt="History> "
+   --pointer="▶"
+   --marker="✓"
+   '
 
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
+   if (( $+commands[fd] )); then
+       export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+       export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+       export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+   fi
 
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
+   # File preview: use bat when installed, otherwise plain text.
+   export FZF_CTRL_T_OPTS='
+   --preview "if command -v bat >/dev/null 2>&1; then
+   bat --style=numbers --color=always --line-range :500 -- {}
+else
+    head -n 500 -- {}
+    fi"
+    --preview-window=right:60%
+    '
 
-# Uncomment one of the following lines to change the auto-update behavior
-# zstyle ':omz:update' mode disabled  # disable automatic updates
-# zstyle ':omz:update' mode auto      # update automatically without asking
-# zstyle ':omz:update' mode reminder  # just remind me to update when it's time
-
-# Uncomment the following line to change how often to auto-update (in days).
-# zstyle ':omz:update' frequency 13
-
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# You can also set it to another string to have that shown instead of the default red dots.
-# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
-# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
-
-source $ZSH/oh-my-zsh.sh
-
-# User configuration
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-export EDITOR='nvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch $(uname -m)"
-
-# Set personal aliases, overriding those provided by Oh My Zsh libs,
-# plugins, and themes. Aliases can be placed here, though Oh My Zsh
-# users are encouraged to define aliases within a top-level file in
-# the $ZSH_CUSTOM folder, with .zsh extension. Examples:
-# - $ZSH_CUSTOM/aliases.zsh
-# - $ZSH_CUSTOM/macos.zsh
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
-bindkey -v
-bindkey -s '^F' 'tmux-sessionizer\n'
-bindkey -s '^[p' 'pdf-sessionizer\n'
-bindkey -M viins '^Y' autosuggest-accept 
-bindkey -M viins '^P' up-line-or-beginning-search
-bindkey -M viins '^N' down-line-or-beginning-search
-
-alias vim="nvim"
-alias vi="nvim"
-alias v="nvim"
-alias ls="eza --icons=always"
-alias c="clear"
-alias ff="fastfetch"
-alias spotify="spotify_player"
-alias fzf="fzf --border --layout reverse --height 80%"
-alias oc="opencode"
-
-(( $+commands[fzf] )) && source <(fzf --zsh)
-(( $+commands[jj] )) && source <(jj util completion zsh)
-(( $+commands[zoxide] )) && eval "$(zoxide init zsh)"
+   # Directory preview: eza → tree → ordinary ls.
+   export FZF_ALT_C_OPTS='
+   --preview "if command -v eza >/dev/null 2>&1; then
+   eza --tree --level=2 --color=always --icons=always -- {}
+elif command -v tree >/dev/null 2>&1; then
+    tree -C -L 2 -- {}
+else
+    ls -la -- {}
+    fi"
+    --preview-window=right:50%
+    '
 
 
-[[ -r /run/current-system/sw/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && source /run/current-system/sw/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-[[ -r /run/current-system/sw/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /run/current-system/sw/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+   # ── Optional integrations ────────────────────────────────────
 
+   # Initialize vi mode before fzf installs its keybindings.
+   bindkey -v
+
+   # Modern fzf supplies completion and keybindings through --zsh.
+   if (( $+commands[fzf] )); then
+       source <(fzf --zsh)
+   fi
+
+   if (( $+commands[jj] )); then
+       source <(jj util completion zsh)
+   fi
+
+   if (( $+commands[zoxide] )); then
+       eval "$(zoxide init zsh)"
+   fi
+
+
+   # ── Keybindings ──────────────────────────────────────────────
+
+   autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+   zle -N up-line-or-beginning-search
+   zle -N down-line-or-beginning-search
+
+   # Search history using the text already typed.
+   bindkey -M viins '^P' up-line-or-beginning-search
+   bindkey -M viins '^N' down-line-or-beginning-search
+
+   # NixOS loads autosuggestions; bind this only when its widget exists.
+   if (( $+widgets[autosuggest-accept] )); then
+       bindkey -M viins '^Y' autosuggest-accept
+   fi
+
+   # Sessionizer bindings can be added once the scripts exist:
+   bindkey -M viins -s '^F' 'tmux-sessionizer\n'
+   # bindkey -M viins -s '^[p' 'pdf-sessionizer\n'
+
+
+   # ── Aliases ──────────────────────────────────────────────────
+
+   alias vim='nvim'
+   alias vi='nvim'
+   alias v='nvim'
+   alias c='clear'
+
+   if (( $+commands[eza] )); then
+       alias ls='eza --icons=always'
+   fi
+
+   if (( $+commands[fastfetch] )); then
+       alias ff='fastfetch'
+   fi

@@ -1,0 +1,85 @@
+/* Minimal transparent bar, bold text and Iris accents. */
+* {
+    font-family: "SauceCodePro Nerd Font Mono";
+    font-size: 13px;
+    font-weight: Black;
+    color: #e0def4;
+    background: none;
+    padding: 0px 10px;
+    margin: 0px 0px;
+    border-radius: 0px;
+}
+
+#bar {
+    background: none;
+    padding: 0px 6px;
+    margin: 0px;
+}
+#bar.sel {
+    background: none;
+}
+
+#tags {
+    padding: 0px 10px;
+    min-width: 24px;
+}
+#tags.empty {
+    color: #6e6a86;
+}
+#tags.occupied {
+    color: #e0def4;
+}
+#tags.active {
+    background: none;
+    color: #ebbcba;
+}
+#tags.urgent {
+    background: #eb6f92;
+    color: #191724;
+}
+#overview {
+    color: #c4a7e7;
+}
+#custom-layout-divider {
+    color: #6e6a86;
+    padding: 0px 0px;
+}
+#layout {
+    color: #c4a7e7;
+}
+#title {
+    color: #908caa;
+    margin-left: 28px;
+}
+#custom-keyboardlayout {
+    color: #ebbcba;
+}
+#network {
+    color: #ebbcba;
+}
+#mem {
+    color: #ebbcba;
+}
+#volume {
+    color: #ebbcba;
+}
+#clock {
+    color: #ebbcba;
+}
+#tray {
+    padding: 0px 8px;
+}
+menu {
+    background: #1f1d2e;
+    color: #e0def4;
+    border-color: #403d52;
+    border-radius: 0px;
+    font-size: 14px;
+}
+menuitem {
+    color: #e0def4;
+}
+menuitem:hover {
+    background: #26233a;
+    color: #c4a7e7;
+}
